@@ -1,0 +1,27 @@
+services:
+  greenshop-agent:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      # בתוך רשת Docker פונים ל-n8n בשם השירות ולא ב-localhost
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/greenshop
+    volumes:
+      - ./chroma_db:/app/chroma_db
+    depends_on:
+      - n8n
+
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

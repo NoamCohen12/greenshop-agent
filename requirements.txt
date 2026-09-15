@@ -1,0 +1,11 @@
+langchain
+langchain-ollama
+langchain-openai
+langchain-chroma
+langchain-text-splitters
+langgraph
+flask
+python-dotenv
+requests
+pydantic
+grandalf

@@ -1,0 +1,21 @@
+# Environment variables (contains secrets - never commit)
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Vector DB local storage
+chroma_db/
+
+# ארכיון ההגשה - נבנה מחדש ע"י build_submission.py
+*.zip
+
+# קבצי ביניים של יצירת ה-PDF
+docs/system_specification.html
+learning/GreenShop_Learning.html
+
+# OS / editor
+.DS_Store

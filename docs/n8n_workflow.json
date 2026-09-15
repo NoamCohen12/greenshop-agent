@@ -1,0 +1,129 @@
+{
+  "name": "GreenShop Customer Service",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "greenshop",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-entry",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "greenshop-webhook"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.request_type }}",
+                    "rightValue": "order_status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "order_status"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.request_type }}",
+                    "rightValue": "refund_request",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "refund_request"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-request-type",
+      "name": "Switch By Request Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// מדמה שליפת סטטוס הזמנה ממסד הנתונים של החברה\nconst orderId = $('Webhook').first().json.body.order_id;\n\nconst mockOrderDatabase = {\n  '12345': { status: 'בדרך אליך', carrier: 'שליחים אקספרס', tracking: 'IL998877', estimated_delivery: '2026-09-18' },\n  '67890': { status: 'נמסר', carrier: 'דואר ישראל', tracking: 'IL112233', delivered_at: '2026-09-10' },\n  '55555': { status: 'מתעכב במחסן', carrier: 'שליחים אקספרס', tracking: 'IL445566', estimated_delivery: '2026-09-22' }\n};\n\nconst order = mockOrderDatabase[orderId];\n\nreturn [{\n  json: order\n    ? { success: true, order_id: orderId, ...order }\n    : { success: false, order_id: orderId, error: 'מספר הזמנה לא נמצא במערכת' }\n}];"
+      },
+      "id": "fetch-order-status",
+      "name": "Fetch Order Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// מדמה יצירת קופון פיצוי ורישום בקשת החזר במערכת\nconst body = $('Webhook').first().json.body;\nconst orderId = body.order_id;\nconst details = body.details || '';\n\n// הפיצוי המקסימלי מוגבל לפי מדיניות החברה\nconst MAX_COMPENSATION_ILS = 200;\nconst couponCode = 'GS-' + Math.random().toString(36).substring(2, 8).toUpperCase();\n\nreturn [{\n  json: {\n    success: true,\n    order_id: orderId,\n    refund_request_id: 'REF-' + orderId,\n    status: 'הבקשה נרשמה וממתינה לאישור',\n    compensation_coupon: couponCode,\n    compensation_value_ils: MAX_COMPENSATION_ILS,\n    note: 'הזיכוי יתבצע תוך 5-7 ימי עסקים ממועד קבלת המוצר במחסן',\n    reason: details\n  }\n}];"
+      },
+      "id": "create-refund",
+      "name": "Create Refund Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "respond-to-agent",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [700, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Switch By Request Type", "type": "main", "index": 0 }]]
+    },
+    "Switch By Request Type": {
+      "main": [
+        [{ "node": "Fetch Order Status", "type": "main", "index": 0 }],
+        [{ "node": "Create Refund Request", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Order Status": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    },
+    "Create Refund Request": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

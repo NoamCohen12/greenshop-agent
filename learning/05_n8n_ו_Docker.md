@@ -56,9 +56,10 @@ n8n מייצג את **המערכות של החברה** — מסד ההזמנות
 **3a. Fetch Order Status** — שליפת סטטוס
 ```javascript
 const mockOrderDatabase = {
-  '12345': { status: 'בדרך אליך', carrier: 'שליחים אקספרס', tracking: 'IL998877', ... },
-  '67890': { status: 'נמסר', ... },
-  '55555': { status: 'מתעכב במחסן', ... }
+  '12345': { status: 'בדרך אליך', tracking: 'IL998877', order_total_ils: 278, final_sale: false, ... },
+  '67890': { status: 'נמסר', order_total_ils: 89, final_sale: false, ... },
+  '55555': { status: 'מתעכב במחסן', order_total_ils: 129, final_sale: false, ... },
+  '77777': { status: 'נמסר', order_total_ils: 149, final_sale: true, ... }
 };
 
 const order = mockOrderDatabase[orderId];
@@ -71,13 +72,18 @@ return [{ json: order
 
 **המסמך מאשר במפורש** שימוש בנתוני Mock: "מותר ואף מומלץ להשתמש במודלי AI ליצור... נתוני Mock כדי שהבדיקה תהיה עשירה ומציאותית."
 
+**למה `order_total_ils` ו-`final_sale` נמצאים כאן:** בלעדיהם אי אפשר לאכוף את מדיניות ההחזרות. `order_total_ils` מאפשר לחשב פיצוי שלא עולה על שווי ההזמנה, ו-`final_sale` מסמן מוצר במבצע "כל המכירות סופיות" שאינו ניתן להחזרה. הזמנה `99999` אינה קיימת בכוונה — זהו מקרה הקצה בתרחיש 5.
+
 **3b. Create Refund Request** — רישום החזר
 ```javascript
 const MAX_COMPENSATION_ILS = 200;
+const compensation = Math.min(order.order_total_ils, MAX_COMPENSATION_ILS);
 const couponCode = 'GS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 ```
 
-כאן יושבת שכבת ההגנה השלישית (ראה חלק 3).
+כאן יושבת שכבת ההגנה השלישית (ראה חלק 3). הפיצוי נגזר משווי ההזמנה, ולא מספר קבוע.
+
+**למה מסד הנתונים מופיע בשני הצמתים:** כל צומת Code ב-n8n רץ בסביבה נפרדת ואינו רואה משתנים של צומת אחר. במערכת אמיתית שני הצמתים היו פונים לאותו מסד נתונים; כאן, בהיעדר מסד אמיתי, הנתונים משוכפלים. **זו חולשה מודעת** — אם תישאל עליה, זו התשובה (ראה גם 6.9, חולשות ושיפורים עתידיים).
 
 **4. Respond to Webhook** — מחזיר את התוצאה לסוכן.
 

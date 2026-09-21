@@ -37,4 +37,13 @@ def tool_execution_node(state: GreenShopState) -> dict:
             tool_result = message.content
             break
 
-    return {"tool_result": tool_result}
+    # אם הסוכן בחר לא לקרוא לכלי (למשל הלקוח לא ציין מספר הזמנה),
+    # התשובה שלו היא המידע היחיד שיש - שומרים אותה כדי שצומת ה-Generation
+    # יוכל לבקש מהלקוח את הפרט החסר במקום לענות תשובה גנרית.
+    tool_agent_message = None
+    if tool_result is None:
+        last_message = response["messages"][-1]
+        if getattr(last_message, "content", None):
+            tool_agent_message = last_message.content
+
+    return {"tool_result": tool_result, "tool_agent_message": tool_agent_message}

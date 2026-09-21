@@ -10,22 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.graph import greenshop_graph
-
-
-def build_initial_state(user_message: str) -> dict:
-    return {
-        "user_message": user_message,
-        "is_input_valid": True,
-        "block_reason": None,
-        "route": None,
-        "retrieved_context": None,
-        "tool_result": None,
-        "draft_answer": None,
-        "is_output_safe": False,
-        "final_answer": None,
-        "guardrail_feedback": None,
-        "regeneration_attempts": 0,
-    }
+from src.state import build_initial_state
 
 
 SCENARIOS = [
@@ -56,6 +41,12 @@ SCENARIOS = [
     {
         "name": "5. מקרה קצה - הזמנה שאינה קיימת במערכת",
         "message": "מה קורה עם ההזמנה שלי מספר 99999?",
+        "expected_route": "customer_specific",
+        "expect_valid": True,
+    },
+    {
+        "name": "6. מקרה קצה - בקשה ללא מספר הזמנה",
+        "message": "איפה ההזמנה שלי? היא לא הגיעה",
         "expected_route": "customer_specific",
         "expect_valid": True,
     },

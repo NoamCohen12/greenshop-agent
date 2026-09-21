@@ -24,6 +24,11 @@ def generation_node(state: GreenShopState) -> dict:
         context_parts.append(f"מידע מבסיס הידע:\n{state['retrieved_context']}")
     if state.get("tool_result"):
         context_parts.append(f"תוצאת בדיקה במערכות החברה:\n{state['tool_result']}")
+    if state.get("tool_agent_message"):
+        context_parts.append(
+            "לא בוצעה בדיקה במערכות החברה כי חסר פרט מזהה. "
+            f"יש לבקש מהלקוח את הפרט החסר, בהתאם לכך:\n{state['tool_agent_message']}"
+        )
     if state.get("guardrail_feedback"):
         context_parts.append(
             f"הטיוטה הקודמת נפסלה על ידי בקרת האיכות מהסיבה הבאה - יש לתקן אותה: {state['guardrail_feedback']}"

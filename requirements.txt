@@ -1,11 +1,15 @@
-langchain
-langchain-ollama
-langchain-openai
-langchain-chroma
-langchain-text-splitters
-langgraph
-flask
-python-dotenv
-requests
-pydantic
-grandalf
+# הגרסאות נעוצות לגרסאות שבהן המערכת נבנתה ונבדקה.
+# LangChain משנה API בין גרסאות ראשיות, ולכן נעילה זו מבטיחה
+# שהתקנה על מחשב אחר תריץ בדיוק את אותו קוד שעובד כאן.
+langchain==1.4.0
+langchain-core==1.6.3
+langchain-ollama==1.1.0
+langchain-openai==1.6.2
+langchain-chroma==1.1.0
+langchain-text-splitters==1.1.2
+langgraph==1.2.11
+flask==3.1.3
+python-dotenv==1.2.3
+requests==2.34.2
+pydantic==2.13.5
+grandalf==0.8

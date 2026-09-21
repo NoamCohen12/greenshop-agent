@@ -39,6 +39,11 @@ def output_guardrail_node(state: GreenShopState) -> dict:
         source_parts.append(f"מידע מבסיס הידע:\n{state['retrieved_context']}")
     if state.get("tool_result"):
         source_parts.append(f"נתונים שהוחזרו ממערכות החברה:\n{state['tool_result']}")
+    if state.get("tool_agent_message"):
+        source_parts.append(
+            "חסר פרט מזהה ולכן לא בוצעה בדיקה במערכות החברה - "
+            "תשובה שמבקשת מהלקוח את הפרט החסר היא תקינה."
+        )
 
     source_info = "\n\n".join(source_parts) if source_parts else "אין מידע נוסף"
     check: OutputCheck = checker_model.invoke(

@@ -9,6 +9,7 @@ load_dotenv()
 from flask import Flask, jsonify, request
 
 from src.graph import greenshop_graph
+from src.state import build_initial_state
 
 app = Flask(__name__)
 
@@ -22,21 +23,7 @@ def chat():
     if not user_message:
         return jsonify({"error": "יש לשלוח שדה 'message' לא ריק"}), 400
 
-    initial_state = {
-        "user_message": user_message,
-        "is_input_valid": True,
-        "block_reason": None,
-        "route": None,
-        "retrieved_context": None,
-        "tool_result": None,
-        "draft_answer": None,
-        "is_output_safe": False,
-        "final_answer": None,
-        "guardrail_feedback": None,
-        "regeneration_attempts": 0,
-    }
-
-    result_state = greenshop_graph.invoke(initial_state)
+    result_state = greenshop_graph.invoke(build_initial_state(user_message))
 
     return jsonify({"answer": result_state["final_answer"]})
 

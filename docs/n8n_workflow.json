@@ -12,7 +12,10 @@
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "webhookId": "greenshop-webhook"
     },
     {
@@ -73,27 +76,36 @@
       "name": "Switch By Request Type",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [220, 300]
+      "position": [
+        220,
+        300
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// מדמה שליפת סטטוס הזמנה ממסד הנתונים של החברה\nconst orderId = $('Webhook').first().json.body.order_id;\n\nconst mockOrderDatabase = {\n  '12345': { status: 'בדרך אליך', carrier: 'שליחים אקספרס', tracking: 'IL998877', estimated_delivery: '2026-09-18' },\n  '67890': { status: 'נמסר', carrier: 'דואר ישראל', tracking: 'IL112233', delivered_at: '2026-09-10' },\n  '55555': { status: 'מתעכב במחסן', carrier: 'שליחים אקספרס', tracking: 'IL445566', estimated_delivery: '2026-09-22' }\n};\n\nconst order = mockOrderDatabase[orderId];\n\nreturn [{\n  json: order\n    ? { success: true, order_id: orderId, ...order }\n    : { success: false, order_id: orderId, error: 'מספר הזמנה לא נמצא במערכת' }\n}];"
+        "jsCode": "// מדמה שליפת סטטוס הזמנה ממסד הנתונים של החברה\nconst orderId = $('Webhook').first().json.body.order_id;\n\nconst mockOrderDatabase = {\n  '12345': { status: 'בדרך אליך', carrier: 'שליחים אקספרס', tracking: 'IL998877', estimated_delivery: '2026-09-18', order_total_ils: 278, items: 'בקבוק תרמי GreenFlask, תיק גב EcoPack', final_sale: false },\n  '67890': { status: 'נמסר', carrier: 'דואר ישראל', tracking: 'IL112233', delivered_at: '2026-09-10', order_total_ils: 89, items: 'בקבוק תרמי GreenFlask 500 מל', final_sale: false },\n  '55555': { status: 'מתעכב במחסן', carrier: 'שליחים אקספרס', tracking: 'IL445566', estimated_delivery: '2026-09-22', order_total_ils: 129, items: 'ערכת כלי מטבח במבוק BambooChef', final_sale: false },\n  '77777': { status: 'נמסר', carrier: 'דואר ישראל', tracking: 'IL778899', delivered_at: '2026-09-05', order_total_ils: 149, items: 'מנורת שולחן סולארית SunDesk (מבצע סוף עונה)', final_sale: true }\n};\n\nconst order = mockOrderDatabase[orderId];\n\nreturn [{\n  json: order\n    ? { success: true, order_id: orderId, ...order }\n    : { success: false, order_id: orderId, error: 'מספר הזמנה לא נמצא במערכת' }\n}];"
       },
       "id": "fetch-order-status",
       "name": "Fetch Order Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 200]
+      "position": [
+        460,
+        200
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// מדמה יצירת קופון פיצוי ורישום בקשת החזר במערכת\nconst body = $('Webhook').first().json.body;\nconst orderId = body.order_id;\nconst details = body.details || '';\n\n// הפיצוי המקסימלי מוגבל לפי מדיניות החברה\nconst MAX_COMPENSATION_ILS = 200;\nconst couponCode = 'GS-' + Math.random().toString(36).substring(2, 8).toUpperCase();\n\nreturn [{\n  json: {\n    success: true,\n    order_id: orderId,\n    refund_request_id: 'REF-' + orderId,\n    status: 'הבקשה נרשמה וממתינה לאישור',\n    compensation_coupon: couponCode,\n    compensation_value_ils: MAX_COMPENSATION_ILS,\n    note: 'הזיכוי יתבצע תוך 5-7 ימי עסקים ממועד קבלת המוצר במחסן',\n    reason: details\n  }\n}];"
+        "jsCode": "// מדמה יצירת קופון פיצוי ורישום בקשת החזר במערכת\nconst body = $('Webhook').first().json.body;\nconst orderId = body.order_id;\nconst details = body.details || '';\n\n// אותו מסד נתונים כמו בצומת סטטוס ההזמנה - הפיצוי נגזר משווי ההזמנה בפועל\nconst mockOrderDatabase = {\n  '12345': { order_total_ils: 278, final_sale: false },\n  '67890': { order_total_ils: 89, final_sale: false },\n  '55555': { order_total_ils: 129, final_sale: false },\n  '77777': { order_total_ils: 149, final_sale: true }\n};\n\nconst order = mockOrderDatabase[orderId];\n\nif (!order) {\n  return [{ json: { success: false, order_id: orderId, error: 'מספר הזמנה לא נמצא במערכת' } }];\n}\n\n// מוצר במבצע \"כל המכירות סופיות\" אינו ניתן להחזרה, אלא אם הגיע פגום\nif (order.final_sale) {\n  return [{\n    json: {\n      success: false,\n      order_id: orderId,\n      error: 'ההזמנה כוללת מוצר במבצע \"כל המכירות סופיות\" ואינה ניתנת להחזרה',\n      policy_note: 'ניתן להחזיר רק אם המוצר הגיע פגום - נדרש בירור מול נציג אנושי',\n      reason: details\n    }\n  }];\n}\n\n// מדיניות החברה: הפיצוי לא יעלה על שווי ההזמנה, ולא על תקרת הפקיד\nconst MAX_COMPENSATION_ILS = 200;\nconst compensation = Math.min(order.order_total_ils, MAX_COMPENSATION_ILS);\nconst couponCode = 'GS-' + Math.random().toString(36).substring(2, 8).toUpperCase();\n\nreturn [{\n  json: {\n    success: true,\n    order_id: orderId,\n    refund_request_id: 'REF-' + orderId,\n    status: 'הבקשה נרשמה וממתינה לאישור',\n    order_total_ils: order.order_total_ils,\n    compensation_coupon: couponCode,\n    compensation_value_ils: compensation,\n    note: 'הזיכוי יתבצע תוך 5-7 ימי עסקים ממועד קבלת המוצר במחסן',\n    reason: details\n  }\n}];"
       },
       "id": "create-refund",
       "name": "Create Refund Request",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 400]
+      "position": [
+        460,
+        400
+      ]
     },
     {
       "parameters": {
@@ -104,26 +116,67 @@
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [700, 300]
+      "position": [
+        700,
+        300
+      ]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{ "node": "Switch By Request Type", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Switch By Request Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Switch By Request Type": {
       "main": [
-        [{ "node": "Fetch Order Status", "type": "main", "index": 0 }],
-        [{ "node": "Create Refund Request", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Fetch Order Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Refund Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Fetch Order Status": {
-      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Create Refund Request": {
-      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "pinData": {}
 }

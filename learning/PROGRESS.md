@@ -39,15 +39,17 @@
 ## שלב 4 — מעבר על הקוד
 📄 [`04_מעבר_על_הקוד.md`](04_מעבר_על_הקוד.md)
 
-- [~] 4.1 `state.py`
-- [~] 4.2 `model_provider.py`
-- [~] 4.3 `nodes/input_guardrail_router.py` — צומת 1
-- [~] 4.4 `rag/vector_store.py` + `nodes/retrieval.py` — צומת 2
-- [~] 4.5 `tools/n8n_tool.py` + `nodes/tool_execution.py` — צומת 3
-- [~] 4.6 `nodes/generation.py` — צומת 4
-- [~] 4.7 `nodes/output_guardrail.py` — צומת 5
-- [~] 4.8 `graph.py` — חיבור הכל
-- [~] 4.9 `server.py` + `startup.py`
+- [V] 4.1 `state.py`
+- [V] 4.2 `model_provider.py`
+- [V] 4.3 `nodes/input_guardrail_router.py` — צומת 1
+- [V] 4.4 `rag/vector_store.py` + `nodes/retrieval.py` — צומת 2
+- [V] 4.5 `tools/n8n_tool.py` + `nodes/tool_execution.py` — צומת 3
+- [V] 4.6 `nodes/generation.py` — צומת 4
+- [V] 4.7 `nodes/output_guardrail.py` — צומת 5
+- [V] 4.8 `graph.py` — חיבור הכל
+- [V] 4.9 `server.py` + `startup.py`
+
+> ⚠️ **טרם נענו 6 השאלות לבדיקה עצמית שבסוף הפרק.** נועם ביקש לחזור אליהן.
 
 ## שלב 5 — n8n ו-Docker
 📄 [`05_n8n_ו_Docker.md`](05_n8n_ו_Docker.md)
@@ -104,4 +106,6 @@
 | 2026-09-21 | נלמד חלק 3 (Guardrails) | נבחן בעל-פה: 3.3 + שכבת n8n. הפרק הורחב בעקבות קושיה נכונה |
 | 2026-09-22 | הובהרו 3.4 ו-3.6 בשיחה | פלט מובנה, לולאת התיקון, ההפרדה בין חסימה לאי-קריאה לכלי |
 | 2026-09-22 | n8n הוגדר מחדש + 6/6 תרחישים עברו | volume חדש אחרי שינוי שם התיקייה; התיקונים אומתו מקצה לקצה |
+| 2026-09-22/23 | נלמד חלק 4 במלואו (4.1-4.9) | שיחה מעמיקה שורה-שורה. **טרם נענו 6 השאלות לבדיקה עצמית** |
+| 2026-09-22 | נלמדו 4.1-4.6 בשיחה מעמיקה | נותרו 4.7-4.9 (output_guardrail, graph, server) |
 | 2026-09-21 | תוקנו 5 ליקויים בקוד | נעילת גרסאות, איחוד State, מספר הזמנה חסר, פיצוי לפי שווי, cache |

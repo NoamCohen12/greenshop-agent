@@ -39,7 +39,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   code {{
     background: #f2f2f2; padding: 2px 5px; border-radius: 3px;
     font-family: Consolas, "Courier New", monospace;
-    direction: ltr; display: inline-block; font-size: 0.88em;
+    font-size: 0.88em;
+    /* בידוד דו-כיווני: מונע מסימני פיסוק עבריים לקפוץ לצד הלא נכון
+       כשמונח באנגלית מופיע באמצע משפט בעברית */
+    direction: ltr; unicode-bidi: isolate; display: inline;
   }}
   pre {{
     background: #f8f8f8; border: 1px solid #e0e0e0; padding: 12px;

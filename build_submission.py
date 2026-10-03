@@ -15,7 +15,7 @@ OUTPUT_ZIP = os.path.join(PROJECT_ROOT, f"{ARCHIVE_ROOT}.zip")
 
 # קבצים ותיקיות שלא נכללים בהגשה
 # learning/ הוא חומר לימוד אישי ואינו חלק מההגשה
-EXCLUDED_DIRS = {"venv", ".venv", "__pycache__", "chroma_db", ".git", ".idea", ".vscode", "learning"}
+EXCLUDED_DIRS = {"venv", ".venv", "__pycache__", "chroma_db", ".git", ".idea", ".vscode", "learning", ".claude"}
 EXCLUDED_FILES = {".env", ".DS_Store", os.path.basename(OUTPUT_ZIP)}
 EXCLUDED_EXTENSIONS = {".pyc", ".pyo", ".zip"}
 
